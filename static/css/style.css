@@ -61,7 +61,7 @@ h1, .brand {
 }
 
 .hero {
-    padding: 4.5rem 0 5rem;
+    padding: 4.5rem 0 2rem;
 }
 
 .hero-grid {
@@ -192,4 +192,31 @@ h1, .brand {
     .social-links {
         justify-content: flex-start;
     }
+}
+
+.kegemaran {
+    padding: 0 0 4rem;
+}
+
+.kegemaran-wrapper {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+}
+
+.kegemaran-content {
+    grid-column: 1;
+}
+
+.kegemaran-content h2 {
+    font-size: 2rem;
+    color: var(--line);
+    margin-bottom: 1rem;
+}
+
+.kegemaran-item {
+    margin-bottom: 1rem;
+}
+
+.kegemaran-item h3 {
+    margin-bottom: 0.1rem;
 }
