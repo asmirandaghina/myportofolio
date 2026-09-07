@@ -195,6 +195,10 @@ h1, .brand {
     .social-links {
         justify-content: flex-start;
     }
+
+    .kegemaran-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .kegemaran {
@@ -202,12 +206,7 @@ h1, .brand {
 }
 
 .kegemaran-wrapper {
-    display: grid;
-    grid-template-columns: 1.3fr 1fr;
-}
-
-.kegemaran-content {
-    grid-column: 1;
+    display: block;
 }
 
 .kegemaran-content h2 {
@@ -222,4 +221,10 @@ h1, .brand {
 
 .kegemaran-item h3 {
     margin-bottom: 0.1rem;
+}
+
+.kegemaran-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
 }
