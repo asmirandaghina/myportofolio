@@ -255,7 +255,7 @@ h1, .brand {
 
 .experience-card {
     padding: 1.25rem;
-    background-color: #fff;
+    background-color: #f1e4c1;
     border: 1px solid var(--line);
     border-radius: var(--radius);
 }
