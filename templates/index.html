@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghina - Portfolio</title>
+    <title>{{ name }}- Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,9 +12,10 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="#profile" class="brand">Ghina</a>
+            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
             <nav>
-                <a href="#profile">Profil</a>
+                <a href="{% url 'main:show_main' %}">Profil</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
                 <a href="#kegemaran">Kegemaran</a>
             </nav>
         </div>
@@ -25,7 +26,7 @@
             <div class="container hero-grid">
                 <div class="hero-identity">
                     <p class="hero-kicker">Sistem Informasi &middot; Universitas Indonesia</p>
-                    <h1>Asmiranda Ghina</h1>
+                    <h1>{{ name }}</h1>
                 </div>
                 <div class="hero-photo">
                     <div class="photo-frame">
@@ -34,15 +35,15 @@
                     </div>
                 </div>
                 <div class="hero-details">
-                    <p class="bio"><em>Ohoi!</em> Celukku <em>"Ghina"</em>, sapa aku melalui kanal yang kutautkan, dan balasanku tentu akan hangat. Aku tertawan akan segala yang menarik menurut bulan malam ini. Sistem Informasi UI kutapaki, sebab ucap bulan, segala yang menarik itu 'kan hampiriku dengan baik.</p>
+                    <p class="bio">{{ bio|safe }}</p>
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
-                            <dd>2506656482</dd>
+                            <dd>{{ NPM }}</dd>
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S1 Sistem Informasi</dd>
+                            <dd>{{ study_program }}</dd>
                         </div>
                     </dl>
                     <div class="social-links">
@@ -79,7 +80,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 Ghina. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
 </body>
