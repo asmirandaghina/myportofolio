@@ -3,6 +3,8 @@ from django.db import models
 
 class Experience(models.Model):
     EXPERIENCE_CHOICES = [
+        ('education', 'Pendidikan'),
+        ('organization', 'Organisasi'),
         ('internship', 'Internship'),
         ('research', 'Research'),
         ('volunteer', 'Volunteer'),

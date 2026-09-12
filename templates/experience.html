@@ -15,7 +15,7 @@
             <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
             <nav>
                 <a href="{% url 'main:show_main' %}">Profil</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_experience' %}">Pengalaman</a>
             </nav>
         </div>
     </header>
@@ -23,12 +23,13 @@
     <main>
        <section class = "experience-section" id = "experience">
         <div class="container">
-            <p class = "section-kicker">Perjalananku sejauh ini</p>
-            <h1>Experience</h1>
+            <p class = "section-kicker">Semasa Sekolah</p>
+            
 
             <div class="experience-grid">
                 {% for experience in experience_list %}
                 <article class="experience-card">
+                    <div class="experience-block"></div>
                     <span class="experience-category">
                         {{ experience.get_category_display }}
                     </span>

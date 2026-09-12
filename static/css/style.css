@@ -5,12 +5,12 @@
 }
 
 :root {
-    --ink: #1c1917;
-    --paper: #f1e4c1;
+    --ink: #ede3dd;
+    --paper: #2E6A2C;
     --accent: #e36888;
-    --accent-dark: #6698cc;
-    --line: #1db695;
-    --text-muted: #1c1917;
+    --accent-dark: #e36888;
+    --line: #93e08c;
+    --text-muted: #ede3dd;
     --radius: 4px;
 }
 
@@ -23,6 +23,7 @@ body {
 
 h1, .brand {
     font-family: "Poppins", -apple-system, sans-serif;
+    color: #F6E335;
 }
 
 .container {
@@ -152,12 +153,27 @@ h1, .brand {
 
 .photo-block {
     position: absolute;
-    top: 1.25rem;
-    left: 1.25rem;
-    width: 100%;
-    height: 100%;
-    background-color: var(--accent);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110%;
+    height: 110%;
+    background-color: #E75609;
     border-radius: 50%;
+    border: 3px solid #000000;
+    z-index: 0;
+}
+
+.photo-block2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 115%;
+    height: 115%;
+    background-color: #F5B629;
+    border-radius: 50%;
+    border: 3px solid #000000;
     z-index: 0;
 }
 
@@ -169,7 +185,7 @@ h1, .brand {
     aspect-ratio: 3 / 4;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid var(--ink);
+    border: 3px solid #000000;
 }
 
 .site-footer {
@@ -232,6 +248,7 @@ h1, .brand {
 .experience-section {
     padding: 4rem 0;
     border-top: 1px solid var(--line);
+    background-color: #F5B629;
 }
 
 .section-kicker {
@@ -254,10 +271,24 @@ h1, .brand {
 }
 
 .experience-card {
+    position: relative;
+    z-index: 0; /* bikin stacking context sendiri */
     padding: 1.25rem;
-    background-color: #f1e4c1;
-    border: 1px solid var(--line);
+    background-color: #F504A4;
+    border: 3px solid #000000;
     border-radius: var(--radius);
+}
+
+.experience-block {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 100%;
+    height: 100%;
+    background-color: #4C93EF;
+    border: 3px solid #000000;
+    border-radius: var(--radius);
+    z-index: -1;
 }
 
 .experience-category {
