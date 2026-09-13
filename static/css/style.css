@@ -313,3 +313,27 @@ h1, .brand {
     font-size: 0.85rem;
     font-weight: 600;
 }
+
+.lakon-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius);
+}
+
+.lakon-back {
+    padding: 0;
+    overflow: hidden;
+}
+
+.lakon-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-family: 0.75rem;
+    padding: 0.4rem 0.6rem;
+    margin: 0;
+}

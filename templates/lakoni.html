@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ku Lakoni - {{ name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
+            <nav>
+                <a href="{% url 'main:show_main' %}">Profil</a>
+                <a href="{% url 'main:show_experience' %}">Perjalanan</a>
+                <a href="{% url 'main:show_lakoni' %}">Ku Lakoni</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+       <section class = "lakoni-section" id = "lakoni">
+        <div class="container">
+            <h1>Ku Lakoni</h1>
+
+            <div class="lakoni-grid">
+                {% for lakon in lakon_list %}
+                    <div class="lakon-card">
+                        <input type="checkbox" id="flip-{{ lakon.id }}" class="lakon-toggle">
+                        <label for="flip-{{ lakon.id }}" class="lakon-inner">
+                            <div class="lakon-front">
+                                <span class="lakon-category">{{ lakon.get_category_display }}</span>
+                                <h2>{{ lakon.title }}</h2>
+                            </div>
+                            <div class="lakon-back">
+                                {% if lakon.photo %}
+                                    <img src="/static/{{ lakon.photo }}" class="lakon-photo">
+                                {% else %}
+                                    <p class="lakon-placeholder">...</p>
+                                {% endif %}
+                            </div>
+                        </label>
+                    </div>
+                {% empty %}
+                    <p class="empty-state">Belum ada hal yang dilakoni.</p>
+                {% endfor %}    
+            </div>
+        </div>
+       </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,8 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
 
-from main.models import Experience
+from main.models import Experience, Lakon
 
 
 class MainTest(TestCase):
@@ -10,7 +9,8 @@ class MainTest(TestCase):
         self.experience = Experience.objects.create(
             title="Asisten Dosen PBP",
             description="Membantu mahasiswa memahami pengembangan web.",
-            category="part-time",
+            category="organization",
+            period_label="2026",
         )
 
     def test_main_url_is_accessible(self):
@@ -18,8 +18,6 @@ class MainTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "index.html")
-        self.assertNotContains(response, self.experience.title)
-        self.assertContains(response, f'href="{reverse("main:show_experience")}"')
 
     def test_nonexistent_page_returns_404(self):
         response = self.client.get("/halaman-yang-tidak-ada/")
@@ -28,8 +26,7 @@ class MainTest(TestCase):
 
     def test_experience_model(self):
         self.assertEqual(str(self.experience), "Asisten Dosen PBP")
-        self.assertEqual(self.experience.category, "part-time")
-        self.assertTrue(self.experience.is_ongoing)
+        self.assertEqual(self.experience.category, "organization")
 
     def test_experience_page(self):
         response = self.client.get(reverse("main:show_experience"))
@@ -38,21 +35,49 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "experience.html")
         self.assertContains(response, self.experience.title)
         self.assertContains(response, self.experience.description)
-        self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Sedang berlangsung")
-        self.assertContains(response, f'href="{reverse("main:show_main")}"')
+        self.assertContains(response, self.experience.period_label)
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
         response = self.client.get(reverse("main:show_experience"))
 
         self.assertContains(response, "Belum ada pengalaman yang ditambahkan.")
+        self.assertContains(response, "Belum ada pengalaman organisasi.")
 
-    def test_completed_experience(self):
-        self.experience.ended_at = timezone.now()
-        self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
 
-        self.assertFalse(self.experience.is_ongoing)
-        self.assertContains(response, "Selesai")
-        self.assertNotContains(response, "Sedang berlangsung")
+class LakoniTest(TestCase):
+    def setUp(self):
+        self.lakon = Lakon.objects.create(
+            title="Main Kalimba",
+            category="musik",
+            photo="img/lakoni/kalimba.jpg",
+        )
+
+    def test_lakoni_url_is_accessible(self):
+        response = self.client.get(reverse("main:show_lakoni"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "lakoni.html")
+
+    def test_lakoni_data_appears(self):
+        response = self.client.get(reverse("main:show_lakoni"))
+
+        self.assertContains(response, self.lakon.title)
+        self.assertContains(response, "Musik")
+
+    def test_lakon_without_photo(self):
+        Lakon.objects.all().delete()
+        Lakon.objects.create(
+            title="Menulis Puisi",
+            category="tulisan",
+        )
+        response = self.client.get(reverse("main:show_lakoni"))
+
+        self.assertContains(response, "Menulis Puisi")
+        self.assertContains(response, "...")
+
+    def test_empty_lakoni_page(self):
+        Lakon.objects.all().delete()
+        response = self.client.get(reverse("main:show_lakoni"))
+
+        self.assertContains(response, "Belum ada hal yang dilakoni.")

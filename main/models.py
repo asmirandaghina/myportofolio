@@ -28,3 +28,21 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+class Lakon(models.Model):
+    LAKON_CHOICES = [
+        ('desain', 'Desain'),
+        ('musik', 'Musik'),
+        ('seni', 'Seni'),
+        ('tulisan', 'Tulisan'),
+        ('dapur', 'Dapur'),
+        ('coding', 'Coding'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=100)
+    category = models.CharField(max_length=20, choices=LAKON_CHOICES, default='seni')
+    photo = models.CharField(max_length=255, blank=True, help_text="Path relatif, misal: img/lakoni/kalimba.jpg")
+    
+    def __str__(self):
+        return self.title

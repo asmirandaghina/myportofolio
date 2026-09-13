@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from main.models import Experience
+from main.models import Experience, Lakon
 
 # Create your views here.
 def show_main(request):
@@ -19,4 +19,10 @@ def show_experience(request):
     }
     return render(request, "experience.html", context)
 
+def show_lakoni(request):
+    context = {
+        "name": "Asmiranda Ghina",
+        "lakon_list": Lakon.objects.all(),
+    }
+    return render(request, "lakoni.html", context)
 
