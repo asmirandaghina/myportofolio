@@ -15,7 +15,7 @@
             <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
             <nav>
                 <a href="{% url 'main:show_main' %}">Profil</a>
-                <a href="{% url 'main:show_experience' %}">Pengalaman</a>
+                <a href="{% url 'main:show_experience' %}">Perjalanan</a>
             </nav>
         </div>
     </header>
@@ -24,31 +24,39 @@
        <section class = "experience-section" id = "experience">
         <div class="container">
             <p class = "section-kicker">Semasa Sekolah</p>
-            
-
             <div class="experience-grid">
-                {% for experience in experience_list %}
+                {% for experience in education_list %}
                 <article class="experience-card">
                     <div class="experience-block"></div>
                     <span class="experience-category">
-                        {{ experience.get_category_display }}
+                        {{ experience.period_label }}
                     </span>
                     <h2>{{ experience.title }}</h2>
                     <p class="experience-description">
                         {{ experience.description }}
                     </p>
-
-                    {% if experience.is_ongoing %}
-                        <p class="experience-status">Sedang berlangsung</p>
-                    {% else %}
-                        <p class="experience-status">Selesai</p>
-                    {% endif %}
                 </article>
-            {% empty %}
-                <p class="empty-state">
-                    Belum ada pengalaman yang ditambahkan.
-                </p>
-            {% endfor %}
+                {% empty %}
+                    <p class="empty-state">
+                        Belum ada pengalaman yang ditambahkan.
+                    </p>
+                {% endfor %}
+            </div>
+
+            <p class="section-kicker" style="margin-top: 3rem;">Pengalaman</p>
+            <div class="experience-grid">
+                {% for org in organization_list %}
+                <article class="experience-card">
+                    <div class="experience-block"></div>
+                    <span class="experience-category">
+                        {{ org.period_label }}
+                    </span>
+                    <h2>{{ org.title }}</h2>
+                    <p class="experience-description">{{ org.description }}</p>
+                </article>
+                {% empty %}
+                <p class="empty-state">Belum ada pengalaman organisasi.</p>
+                {% endfor %}
             </div>
         </div>
        </section>
