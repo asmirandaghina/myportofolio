@@ -18,3 +18,6 @@ Saya menggunakan Claude untuk membantu debug error contohnya berupa typo yang me
 2. Karena data bersifat dinamis dan jumlahnya bisa berubah sewaktu-waktu. Kalau ditulis manual di HTML, harus buka dan edit file HTML setiap kali ingin menambah atau mengubah data, yang rawan timbul typo. Karena data dinamis, template menggunakan {% for %} dan {% empty %} agar bisa menangani kemungkinan kasus.
 
 3. makemigrations berfungsi untuk membuat berkas migrasi yang berisi rencana perubahan model yang belum diterapkan ke database, sedangkan migrate berfungsi untuk menerapkan perubahan ke database. Kalau hanya menjalankan makemigrations tanpa migrate, berkas migrasinya sudah terbuat tetapi database belum benar-benar berubah. Kalau menjalankan migrate tanpa makemigrations terlebih dahulu, Django tidak akan mengetahui adanya perubahan baru karena Django hanya membaca dari berkas migrasi yang sudah ada, bukan langsung dari models.py.
+
+Penggunaan AI:
+Saya menggunakan Claude untuk membantu menyelesaikan masalah bagian experience.html dan lakoni.html yang tidak bisa dibuka melalui pws. Claude juga memberi tahu saya cara menjalankan fitur flip persegi saat terjadi interaksi. Saya memutuskan sendiri dari seluruh isi dan struktur konten di tugas 2. 
