@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
+<body class="page-lakoni">
     <header class="site-header">
         <div class="container">
             <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
@@ -29,6 +29,7 @@
             <div class="lakoni-grid">
                 {% for lakon in lakon_list %}
                     <div class="lakon-card">
+                        <div class="lakon-block"></div>
                         <input type="checkbox" id="flip-{{ lakon.id }}" class="lakon-toggle">
                         <label for="flip-{{ lakon.id }}" class="lakon-inner">
                             <div class="lakon-front">
