@@ -1,26 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }}- Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<<body class="page-profil">>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Tentangku</a>
-                <a href="{% url 'main:show_experience' %}">Perjalanan</a>
-                <a href="{% url 'main:show_lakoni' %}">Ku Lakoni</a>
-            </nav>
-        </div>
-    </header>
+{% extends "base.html" %}
 
+{% block meta %}
+    <title>{{ name }} - Portfolio</title>
+{% endblock meta %}
+
+{% block bodyclass %}page-profil{% endblock bodyclass %}
+
+{% block content %}
     <main>
         <section class="hero" id="profile">
             <div class="container hero-grid">
@@ -30,9 +16,9 @@
                 </div>
                 <div class="hero-photo">
                     <div class="photo-frame">
-                        <div class="photo-block2"></div>
                         <div class="photo-block"></div>
-                        <img class="avatar" src="/static/img/ghina.jpeg" alt="Potret Ghina">
+                        <div class="photo-block2"></div>
+                        <img class="avatar" src="/static/img/ghina.jpeg" alt="Foto {{ name }}">
                     </div>
                 </div>
                 <div class="hero-details">
@@ -40,7 +26,7 @@
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
-                            <dd>{{ NPM }}</dd>
+                            <dd>{{ npm }}</dd>
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
@@ -78,11 +64,4 @@
             </div>
         </section>
     </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock content %}

@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from main.models import Experience, Lakon
+from django.contrib import messages
+from django.shortcuts import redirect
+from main.forms import LakonForm
 
 # Create your views here.
 def show_main(request):
@@ -26,3 +29,15 @@ def show_lakoni(request):
     }
     return render(request, "lakoni.html", context)
 
+def create_lakon(request):
+    form = LakonForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Hal baru berhasil ditambahkan!")
+        return redirect("main:show_lakoni")
+
+    context = {
+        "name": "Asmiranda Ghina",
+        "form": form,
+    }
+    return render(request, "lakoni_form.html", context)

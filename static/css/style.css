@@ -445,3 +445,58 @@ body.page-perjalanan .site-header nav a,
 body.page-perjalanan .site-footer p {
     color: #000000;
 }
+
+.project-form {
+    width: 100%;
+    max-width: 500px;
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem;
+    border: 1px solid #000000;
+    border-radius: var(--radius);
+    font: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: 2px solid #F6E335;
+}
+
+.form-error {
+    color: #ffdddd;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+}
+
+.button {
+    display: inline-block;
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.65rem 1rem;
+    background: #F6E335;
+    color: #000000;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.button-secondary {
+    background: #ede3dd;
+}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block meta %}
+    <title>Tambah Lakon - {{ name }}</title>
+{% endblock meta %}
+
+{% block bodyclass %}page-lakoni{% endblock bodyclass %}
+
+{% block content %}
+    <main>
+        <section class="lakoni-section" id="lakoni-form">
+            <div class="container">
+                <h1>Tambah Hal Baru</h1>
+                <form method="post"
+                      action="{% url 'main:create_lakon' %}"
+                      class="lakoni-form">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <p class="form-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="button">Tambah</button>
+                    <a href="{% url 'main:show_lakoni' %}" class="button button-secondary">Batal</a>
+                </form>
+            </div>
+        </section>
+    </main>
+{% endblock content %}
