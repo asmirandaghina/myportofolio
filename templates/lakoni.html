@@ -20,20 +20,22 @@
             <div class="lakoni-grid">
                 {% for lakon in lakon_list %}
                     <div class="lakon-card">
-                        <div class="lakon-block"></div>
-                        <input type="checkbox" id="flip-{{ lakon.id }}" class="lakon-toggle">
-                        <label for="flip-{{ lakon.id }}" class="lakon-inner">
-                            <div class="lakon-front">
-                                <span class="lakon-category">{{ lakon.get_category_display }}</span>
-                                <h2>{{ lakon.title }}</h2>
-                            </div>
-                            <div class="lakon-back">
-                                {% if lakon.photo %}
-                                    <img src="/static/{{ lakon.photo }}" class="lakon-photo">
-                                {% else %}
-                                    <p class="lakon-placeholder">...</p>
-                                {% endif %}
-                            </div>
+                        <div class="lakon-flip">
+                            <div class="lakon-block"></div>
+                            <input type="checkbox" id="flip-{{ lakon.id }}" class="lakon-toggle">
+                            <label for="flip-{{ lakon.id }}" class="lakon-inner">
+                                <div class="lakon-front">
+                                    <span class="lakon-category">{{ lakon.get_category_display }}</span>
+                                    <h2>{{ lakon.title }}</h2>
+                                </div>
+                                <div class="lakon-back">
+                                    {% if lakon.photo %}
+                                        <img src="/static/{{ lakon.photo }}" class="lakon-photo">
+                                    {% else %}
+                                        <p class="lakon-placeholder">...</p>
+                                    {% endif %}
+                                </div>
+                        </div>
                         </label>
                         <div class="lakon-actions">
                             <a href="{% url 'main:update_lakon' lakon.id %}" class="button">Sunting</a>

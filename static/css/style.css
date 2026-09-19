@@ -156,8 +156,8 @@ h1, .brand {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 110%;
-    height: 110%;
+    width: 107%;
+    height: 107%;
     background-color: #E75609;
     border-radius: 50%;
     border: 3px solid #000000;
@@ -169,8 +169,8 @@ h1, .brand {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 115%;
-    height: 115%;
+    width: 114%;
+    height: 114%;
     background-color: #F5B629;
     border-radius: 50%;
     border: 3px solid #000000;
@@ -320,6 +320,19 @@ h1, .brand {
     min-height: calc(100vh - 200px);
 }
 
+.project-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.project-header h1 {
+    margin: 0;
+}
+
 .lakoni-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -331,13 +344,14 @@ h1, .brand {
     position: relative;
 }
 
+.lakon-flip {
+    position: relative;
+    height: 220px;
+}
+
 .lakon-block {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 110%;
-    height: 240px;
+    inset: -10px;
     background-color: #63AA44;
     border: 3px solid #000000;
     border-radius: var(--radius);
@@ -354,7 +368,7 @@ h1, .brand {
     z-index: 2;
     display: block;
     width: 100%;
-    height: 220px;
+    height: 100%;
     cursor: pointer;
     transform-style: preserve-3d;
     transition: transform 0.5s ease;
@@ -512,7 +526,7 @@ body.page-perjalanan .site-footer p {
 }
 
 .button-danger {
-    background: #b42318;
+    background: #f1317e;
     color: #fff;
 }
 
@@ -578,7 +592,7 @@ body.page-perjalanan .site-footer p {
     cursor: pointer;
 }
 
-.lakont-delete-modal__actions {
+.lakon-delete-modal__actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
