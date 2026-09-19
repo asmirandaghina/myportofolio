@@ -21,3 +21,13 @@ Saya menggunakan Claude untuk membantu debug error contohnya berupa typo yang me
 
 Penggunaan AI:
 Saya menggunakan Claude untuk membantu menyelesaikan masalah bagian experience.html dan lakoni.html yang tidak bisa dibuka melalui pws. Claude juga memberi tahu saya cara menjalankan fitur flip persegi saat terjadi interaksi. Saya memutuskan sendiri dari seluruh isi dan struktur konten di tugas 2. 
+
+### Tugas 3
+1. ModelForm adalah boilerplate bawaan Django yang otomatis generate struktur form berdasarkan model yang sudah dibuat. Jika membuat form HTML manual, harus menulis ulang tiap input, validasi data, dan menyamakan field form ke field model satu-satu, sehingga kode jadi lebih panjang dan rawan redundansi. Dengan ModelForm, struktur form tinggal mengikuti model yang sudah ada, jadi lebih ringkas dan konsisten. CSRF Token adalah token rahasia unik yang dibuat oleh server dengan tujuan melindungi aplikasi dari request yang tidak terautorisasi, sehingga wajib disertakan pada form agar request yang masuk ke server benar-benar berasal dari form itu sendiri.
+
+2. JSON lebih disukai dibanding XML karena ukurannya lebih ringkas, memiliki parser yang lebih cepat, dan integrasinya dengan JavaScript di sisi frontend sangat natural, terutama pada arsitektur RESTful API.
+
+3. Alur fungsi view yang mengembalikan data dalam bentuk JSON diawali dari request yang masuk ke view, lalu view mengambil data dari database lewat ORM Django dalam bentuk objek Python. Objek tersebut kemudian diserialize melalui sintaks serializers.serialize(...) sehingga berubah menjadi string berformat JSON. String JSON ini dibungkus dalam HttpResponse dan dikirim balik ke client sebagai response HTTP. Proses serialization diperlukan karena objek model Django tidak bisa langsung dikirim lewat HTTP, harus diubah dulu menjadi format teks standar seperti JSON agar bisa dibaca oleh sistem lain.
+
+Penggunaan AI:
+Saya menggunakan Claude umemahami konsep JSON dan proses serialize/deserialize yang belum saya ketahui sebelumnya, serta debug beberapa error saat implementasi, seperti typo pada penulisan sintaks. Juga pada pengaplikasian format JSON yang belum saya ketahui sebelumnya.
