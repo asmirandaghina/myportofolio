@@ -12,7 +12,7 @@
             <div class="container">
                 <h1>{% if is_edit %}Sunting Hal{% else %}Tambah Hal Baru{% endif %}</h1>
                 <form method="post"
-                      action="{% if is_edit %}{% url 'main:update_lakon' form.instance.id %}{% url 'main:create_lakon' %}{% endif %}"
+                      action="{% if is_edit %}{% url 'main:update_lakon' form.instance.id %}{% else %}{% url 'main:create_lakon' %}{% endif %}"
                       class="lakoni-form">
                     {% csrf_token %}
                     {% for field in form %}

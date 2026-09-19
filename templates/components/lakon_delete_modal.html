@@ -1,0 +1,39 @@
+<p class="experience-status">
+    <button type="button"
+            class="button button-danger"
+            popovertarget="delete-lakon-{{ lakon.id }}"
+            aria-label="Hapus {{ lakon.title }}"
+            title="Hapus data">
+        Hapus
+    </button>
+</p>
+<div id="delet-lakon{{ lakon.id }}"
+     class="project-delete-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="delete-lakon-title-{{ lakon.id }}">
+     <button type="button"
+             class=""project-delete-modal__backdrop"
+             popovertarget="delete-lakon-{{ lakon.id }}"
+             popovertargetaction="hide"
+             aria-label="Tutup konfirmasi hapus"></button>
+     <div class="project-delete-modal__content">
+        <button type="button"
+                class="project-delete-modal__close"
+                popovertarget="delete-lakon-{{ lakon.id }}"
+                popovertargetaction="hide"
+                aria-label="Tutup konfirmasi hapus">&times;</button>
+        <h2 id="delete-lakon-title-{{ lakon.id }}">Hapus Data?</h2>
+        <div class="project-delete-modal__actions">
+            <button type="button"
+                    class="button button-secondary"
+                    popovertarget="delete-lakon-{{ lakon.id }}"
+                    popovertargetaction="hide">Batal</button>
+            <form method="post" action="{% url 'main:delete_lakon' lakon.id %}">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger">Ya, hapus</button>
+            </form>
+        </div>
+     </div>
+</div>

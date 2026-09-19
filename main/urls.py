@@ -1,5 +1,5 @@
 from django.urls import path
-from main.views import show_main, show_experience, show_lakoni, create_lakon, update_lakon, delete_lakon
+from main.views import show_main, show_experience, show_lakoni, create_lakon, update_lakon, delete_lakon, get_lakon_json
 
 app_name = "main"
 
@@ -10,4 +10,5 @@ urlpatterns = [
     path("lakoni/add/", create_lakon, name="create_lakon"),
     path("lakoni/<uuid:lakon_id>/edit/", update_lakon, name="update_lakon"),
     path("lakoni/<uuid:lakon_id>/delete/", delete_lakon, name="delete_lakon"),
+    path("api/lakoni/", get_lakon_json, name="get_lakon_json"),
 ]

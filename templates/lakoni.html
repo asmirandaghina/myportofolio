@@ -10,8 +10,13 @@
     <main>
        <section class = "lakoni-section" id = "lakoni">
         <div class="container">
+        <div class="project-header">
             <h1>Ku Lakoni</h1>
-
+            <a href="{% url 'main:create_lakon' %}" class="button project-add-button">
+                <span aria-hidden="true">+</span>
+                Tambah Lakon Baru
+            </a>
+        </div>
             <div class="lakoni-grid">
                 {% for lakon in lakon_list %}
                     <div class="lakon-card">
@@ -30,6 +35,10 @@
                                 {% endif %}
                             </div>
                         </label>
+                        <div class="lakon-actions">
+                            <a href="{% url 'main:update_lakon' lakon.id %}" class="button">Sunting</a>
+                            {% include "components/lakon_delete_modal.html" with lakon=lakon %}
+                        </div>
                     </div>
                 {% empty %}
                     <p class="empty-state">Belum ada hal yang dilakoni.</p>

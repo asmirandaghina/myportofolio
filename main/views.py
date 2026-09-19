@@ -26,9 +26,16 @@ def show_experience(request):
     return render(request, "experience.html", context)
 
 def show_lakoni(request):
+    json_request = get_lakon_json(request)
+    lakon_list = serializers.deserialize(
+        "json",
+        json_request.content.decode("utf-8"),
+    )
+    lakon_list = [item.object for item in lakon_list]
+
     context = {
         "name": "Asmiranda Ghina",
-        "lakon_list": Lakon.objects.all(),
+        "lakon_list": lakon_list,
     }
     return render(request, "lakoni.html", context)
 
@@ -71,4 +78,12 @@ def delete_lakon(request, lakon_id):
 
     return redirect("main:show_lakoni")
 
+def get_lakon_json(request):
+    title_query = request.GET.get("title", "").strip()
+    lakon_list = Lakon.objects.all()
 
+    if title_query:
+        lakon_list = lakon_list.filter(title__icontains=title_query)
+
+    lakon_json = serializers.serialize("json", lakon_list)
+    return HttpResponse(lakon_json, content_type="application/json")
