@@ -22,8 +22,8 @@
                     <span clas="nave-user">{{ user.username }}</span>
                     <a href="{% url 'main:logout' %}">Pulang</a>
                 {% else %}
-                    <a href="{% url 'main:login' %}">Masuk</a>
-                    <a href="{% url 'main:register' %}">Ketuk Pintu</a>
+                    <a href="{% url 'main:login' %}">Ketuk pintu</a>
+                    <a href="{% url 'main:register' %}">Bilik Anyar</a>
                 {% endif %}
             </nav>
         </div>
