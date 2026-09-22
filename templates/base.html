@@ -18,6 +18,13 @@
                 <a href="{% url 'main:show_main' %}">Profil</a>
                 <a href="{% url 'main:show_experience' %}">Perjalanan</a>
                 <a href="{% url 'main:show_lakoni' %}">Ku Lakoni</a>
+                {% if user.is_authenticated %}
+                    <span clas="nave-user">{{ user.username }}</span>
+                    <a href="{% url 'main:logout' %}">Pulang</a>
+                {% else %}
+                    <a href="{% url 'main:login' %}">Masuk</a>
+                    <a href="{% url 'main:register' %}">Ketuk Pintu</a>
+                {% endif %}
             </nav>
         </div>
     </header>

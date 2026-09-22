@@ -6,6 +6,9 @@ from main.forms import LakonForm
 from django.shortcuts import get_object_or_404
 from django.core import serializers
 from django.http import HttpResponse
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.shortcuts import redirect, render
 
 # Create your views here.
 def show_main(request):
@@ -87,3 +90,35 @@ def get_lakon_json(request):
 
     lakon_json = serializers.serialize("json", lakon_list)
     return HttpResponse(lakon_json, content_type="application/json")
+
+def register(request):
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Akun berhasil dibuat. Silakan lakukan log masuk.")
+        return redirect("main:login")
+
+    context = {
+        "name": "Asmiranda Ghina",
+        "form": form,
+    }
+    return render(request, "register.html", context)
+
+def login_user(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        login(request, form.get_user())
+        return redirect("main:show_main")
+
+    context = {
+        "name": "Asmiranda Ghina",
+        "form": form,
+    }
+    return render(request, "login.html", context)
+
+
+def logout_user(request):
+    logout(request)
+    return redirect("main:show_main")
