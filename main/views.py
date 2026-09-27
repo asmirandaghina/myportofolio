@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render
 from main.models import Experience, Lakon
 from django.contrib import messages
@@ -12,11 +13,13 @@ from django.shortcuts import redirect, render
 
 # Create your views here.
 def show_main(request):
+    last_login = request.COOKIES.get('last_login', 'Tak ada sesi masuk atau cookie tak ditemukan')
     context = {
         "name": "Asmiranda Ghina",
         "NPM": "2506656482",
         "study_program": "S1 Sistem Informasi",
         "bio": "Ohoi!",
+        "last_login": last_login
     }
     return render(request, "index.html", context)
 
@@ -109,8 +112,11 @@ def login_user(request):
     form = AuthenticationForm(request, data=request.POST or None)
 
     if request.method == "POST" and form.is_valid():
+        user = form.get_user()
         login(request, form.get_user())
-        return redirect("main:show_main")
+        response = redirect("main:show_main")
+        response.set_cookie('last_login', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        return response
 
     context = {
         "name": "Asmiranda Ghina",
@@ -121,4 +127,6 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    return redirect("main:show_main")
+    response = redirect("main:show_main")
+    response.delete_cookie('last_login')
+    return response
