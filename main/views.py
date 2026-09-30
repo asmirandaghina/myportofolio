@@ -10,6 +10,8 @@ from django.http import HttpResponse
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 def show_main(request):
@@ -45,7 +47,10 @@ def show_lakoni(request):
     }
     return render(request, "lakoni.html", context)
 
+@login_required(login_url="/login/")
 def create_lakon(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
     form = LakonForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -58,6 +63,7 @@ def create_lakon(request):
     }
     return render(request, "lakoni_form.html", context)
 
+@login_required(login_url="/login/")
 def update_lakon (request, lakon_id):
     lakon = get_object_or_404(Lakon, pk=lakon_id)
     form = LakonForm(request.POST or None, instance=lakon)
@@ -74,7 +80,11 @@ def update_lakon (request, lakon_id):
     }
     return render(request, "lakoni_form.html", context)
 
+@login_required(login_url="/login/")
 def delete_lakon(request, lakon_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     lakon = get_object_or_404(Lakon, pk=lakon_id)
 
     if request.method == "POST":
@@ -91,7 +101,7 @@ def get_lakon_json(request):
     if title_query:
         lakon_list = lakon_list.filter(title__icontains=title_query)
 
-    lakon_json = serializers.serialize("json", lakon_list)
+    lakon_json = serializers.serialize("json", lakon_list, use_natural_foreign_keys=True)
     return HttpResponse(lakon_json, content_type="application/json")
 
 def register(request):
@@ -124,9 +134,20 @@ def login_user(request):
     }
     return render(request, "login.html", context)
 
-
 def logout_user(request):
     logout(request)
     response = redirect("main:show_main")
     response.delete_cookie('last_login')
     return response
+
+@login_required(login_url="/login/")
+def toggle_star(request, lakon_id):
+    lakon = get_object_or_404(Lakon, pk=lakon_id)
+
+    if request.method == "POST":
+        if request.user in lakon.starred_by.all():
+            lakon.starred_by.remove(request.user)
+        else:
+            lakon.starred_by.add(request.user)
+
+    return redirect("main:show_lakoni")

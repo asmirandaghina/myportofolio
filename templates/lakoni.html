@@ -35,11 +35,14 @@
                                         <p class="lakon-placeholder">...</p>
                                     {% endif %}
                                 </div>
-                        </div>
                         </label>
+                        </div>
                         <div class="lakon-actions">
-                            <a href="{% url 'main:update_lakon' lakon.id %}" class="button">Sunting</a>
-                            {% include "components/lakon_delete_modal.html" with lakon=lakon %}
+                            {% include "components/lakon_star.html" with lakon=lakon %}
+                            {% if user.is_superuser %}
+                                <a href="{% url 'main:update_lakon' lakon.id %}" class="button">Sunting</a>
+                                {% include "components/lakon_delete_modal.html" with lakon=lakon %}
+                            {% endif %}
                         </div>
                     </div>
                 {% empty %}
