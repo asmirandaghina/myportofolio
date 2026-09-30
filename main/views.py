@@ -44,6 +44,7 @@ def show_lakoni(request):
     context = {
         "name": "Asmiranda Ghina",
         "lakon_list": lakon_list,
+        "can_edit": can_edit(request.user),
     }
     return render(request, "lakoni.html", context)
 
@@ -65,6 +66,9 @@ def create_lakon(request):
 
 @login_required(login_url="/login/")
 def update_lakon (request, lakon_id):
+    if not can_edit(request.user):
+        raise PermissionDenied
+    
     lakon = get_object_or_404(Lakon, pk=lakon_id)
     form = LakonForm(request.POST or None, instance=lakon)
 
@@ -151,3 +155,9 @@ def toggle_star(request, lakon_id):
             lakon.starred_by.add(request.user)
 
     return redirect("main:show_lakoni")
+
+def is_editor(user):
+    return user.groups.filter(name="Editor").exists()
+
+def can_edit(user):
+    return user.is_superuser or is_editor(user)

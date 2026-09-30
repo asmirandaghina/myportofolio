@@ -11,11 +11,16 @@
        <section class = "lakoni-section" id = "lakoni">
         <div class="container">
         <div class="project-header">
+        <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Project berhasil dimuat dengan baik!', 'success')">
+            Test Toast Notifikasi
+        </button>
             <h1>Ku Lakoni</h1>
+            {% if user.is_superuser %}
             <a href="{% url 'main:create_lakon' %}" class="button project-add-button">
                 <span aria-hidden="true">+</span>
                 Tambah Lakon Baru
             </a>
+            {% endif %}
         </div>
             <div class="lakoni-grid">
                 {% for lakon in lakon_list %}
@@ -39,8 +44,10 @@
                         </div>
                         <div class="lakon-actions">
                             {% include "components/lakon_star.html" with lakon=lakon %}
-                            {% if user.is_superuser %}
+                            {% if can_edit %}
                                 <a href="{% url 'main:update_lakon' lakon.id %}" class="button">Sunting</a>
+                            {% endif %}
+                            {% if user.is_superuser %}
                                 {% include "components/lakon_delete_modal.html" with lakon=lakon %}
                             {% endif %}
                         </div>
