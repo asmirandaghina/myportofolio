@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block meta %}
-    <title>Ku Lakoni - {{ name }}</title>
+    <title>Ghina Lakoni - {{ name }}</title>
 {% endblock meta %}
 
 {% block bodyclass %}page-lakoni{% endblock bodyclass %}
@@ -10,11 +10,11 @@
     <main>
        <section class = "lakoni-section" id = "lakoni">
         <div class="container">
-        <div class="project-header">
+        <div class="lakon-header">
         <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Project berhasil dimuat dengan baik!', 'success')">
             Test Toast Notifikasi
         </button>
-            <h1>Ku Lakoni</h1>
+            <h1>Ghina Lakoni</h1>
             {% if user.is_superuser %}
             <a href="{% url 'main:create_lakon' %}" class="button project-add-button">
                 <span aria-hidden="true">+</span>
@@ -22,6 +22,32 @@
             </a>
             {% endif %}
         </div>
+        <form id="lakon-search-form" class="lakon-search">
+            <input type="search"
+                   name="title"
+                   value="{{ title_query }}"
+                   placeholder="Tilik lakon ghina"
+                   class="lakon-search__input"
+                   aria-label="Tilik lakon ghina">
+                <button type="submit" class="button">Tilik</button>
+        </form>
+        <!-- Loading State -->
+        <div id="loading" class="empty-state hide">
+            <p>Memuat Lakon...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="empty-state hide">
+            <p>Tak dapat muat Lakon. Cuba ulang.</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty" class="empty-state hide">
+            <p>Tak ada lakon yang tertemu.</p>
+        </div>
+
+        <!-- Lakon Grid -->
+        <div id="grid" class="empty-state hide"></div>
             <div class="lakoni-grid">
                 {% for lakon in lakon_list %}
                     <div class="lakon-card">
@@ -59,4 +85,126 @@
         </div>
        </section>
     </main>
+    <script>
+    const BASE_LAKON_ENDPOINT = "{% url 'main:get_lakon_json' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    let projectAbortController;
+
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('project-search-form');
+    const searchInput = document.getElementById('search-input');
+
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false}) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    function buildLakonCardElement(item) {
+        const lakon = item.fields;
+        const lakonId = item.pk;
+
+        const articleElement = document.createElement('article');
+        articleElement.className = 'experience-card';
+
+        const imageHtml = lakon.lakon_image_url
+            ?`<img src="${lakon.lakon_image_url}" alt="Gambar ${lakon.title}" class="lakon-image">`
+            : '';
+        
+        const urlHtml = lakon.lakon_url 
+            ? `<a href="${lakon.lakon_url}" class="button">Tilik Lakon</a>`
+            : '';
+
+        const deleteUrl = "{% url 'main:delete_lakon' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', lakonId);
+        const starUrl = "{% url 'main:toggle_star' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', lakonId);
+
+        const deleteHtml = IS_SUPERUSER 
+            ? `<form method="post" action="${deleteUrl}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger" onclick="return confirm('Betulan ingin hapuskan lakon ini?');">Hapus</button>
+            </form>`
+            : '';
+        
+        const isStarredClass = lakon.is_starred ? " is-starred" : "";
+        const starText = lakon.is_starred ? "Unstar" : "Star";
+        const starTitle = lakon.star_count > 0
+            ? `Dibintangi oleh ${lakon.starred_by_names}` 
+            : "Jadilah yang pertama memberi star";
+            
+         const completeCardHtml = `
+            ${imageHtml}
+            <h2>${lakon.title}</h2>
+            <span class="experience-category">${lakon.tech_stack}</span>
+            <p class="experience-description">${lakon.description}</p>
+            <div class="lakon-card-actions">
+                <div class="lakon-actions">
+                    ${urlHtml}
+                    
+                    <form method="post" action="${starUrl}" class="star-form">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="button button-star${isStarredClass}"
+                                title="${starTitle}">
+                            <span aria-hidden="true">★</span>
+                            ${starText}
+                            <span class="star-count">${lakon.star_count}</span>
+                        </button>
+                    </form>
+
+                    ${deleteHtml}
+                </div>
+            </div>
+        `;
+
+        articleElement.innerHTML = completeCardHtml;
+        return articleElement;       
+    }
+
+    async function fetchLakon(searchQuery = "") {
+        if (lakonAbortController) lakonAbortController.abort();
+        lakonAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+            
+            const url = searchQuery ? `${BASE_LAKON_ENDPOINT}?title=${encodeURIComponent(searchQuery)}` : BASE_LAKON_ENDPOINT;
+            
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: lakonAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const lakonData = await response.json();
+
+            if (lakonData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                lakonData.forEach(item => {
+                    gridContainer.appendChild(buildLakonCardElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading lakon:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        fetchLakon(searchInput.value.trim()); 
+    });
+
+    fetchLakon(searchInput.value.trim());
+    </script>
 {% endblock content %}

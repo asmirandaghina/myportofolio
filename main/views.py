@@ -12,6 +12,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 
 # Create your views here.
 def show_main(request):
@@ -34,17 +35,11 @@ def show_experience(request):
     return render(request, "experience.html", context)
 
 def show_lakoni(request):
-    json_request = get_lakon_json(request)
-    lakon_list = serializers.deserialize(
-        "json",
-        json_request.content.decode("utf-8"),
-    )
-    lakon_list = [item.object for item in lakon_list]
+    title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Asmiranda Ghina",
-        "lakon_list": lakon_list,
-        "can_edit": can_edit(request.user),
+        "title_query": title_query,
     }
     return render(request, "lakoni.html", context)
 
@@ -105,8 +100,25 @@ def get_lakon_json(request):
     if title_query:
         lakon_list = lakon_list.filter(title__icontains=title_query)
 
-    lakon_json = serializers.serialize("json", lakon_list, use_natural_foreign_keys=True)
-    return HttpResponse(lakon_json, content_type="application/json")
+    data = []
+    for lakon in lakons:
+        starred_users = lakon.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ",".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(lakon.id),
+            "fields": {
+                "title": lakon.title,
+                "category": lakon.category,
+                "photo": lakon.photo,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+    
+    return JsonResponse(data, safe=False)
 
 def register(request):
     form = UserCreationForm(request.POST or None)
