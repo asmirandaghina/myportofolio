@@ -96,6 +96,8 @@
     const gridContainer = document.getElementById('grid');
     const searchForm = document.getElementById('project-search-form');
     const searchInput = document.getElementById('search-input');
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
 
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false}) {
         loadingState.classList.toggle('hide', !showLoading);
@@ -200,9 +202,22 @@
         }
     }
 
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault(); 
-        fetchLakon(searchInput.value.trim()); 
+    function searchLakon() {
+    fetchLakon(searchInput.value.trim());
+    }
+
+    searchInput.addEventListener("input", function() {
+        clearTimeout(searchDebounceTimer);
+
+        searchDebounceTimer = setTimeout(function() {
+            searchLakon();
+        }, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    searchForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchLakon();
     });
 
     fetchLakon(searchInput.value.trim());
