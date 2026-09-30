@@ -11,19 +11,19 @@
        <section class = "lakoni-section" id = "lakoni">
         <div class="container">
         <div class="lakon-header">
-        <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Project berhasil dimuat dengan baik!', 'success')">
-            Test Toast Notifikasi
-        </button>
             <h1>Ghina Lakoni</h1>
             {% if user.is_superuser %}
-            <a href="{% url 'main:create_lakon' %}" class="button project-add-button">
+            <button type="button"
+                    class="button lakon-add-button"
+                    popovertarget="add-lakon-modal">
                 <span aria-hidden="true">+</span>
                 Tambah Lakon Baru
-            </a>
+            </button>
             {% endif %}
         </div>
         <form id="lakon-search-form" class="lakon-search">
             <input type="search"
+                   id="search-input"
                    name="title"
                    value="{{ title_query }}"
                    placeholder="Tilik lakon ghina"
@@ -47,54 +47,25 @@
         </div>
 
         <!-- Lakon Grid -->
-        <div id="grid" class="empty-state hide"></div>
-            <div class="lakoni-grid">
-                {% for lakon in lakon_list %}
-                    <div class="lakon-card">
-                        <div class="lakon-flip">
-                            <div class="lakon-block"></div>
-                            <input type="checkbox" id="flip-{{ lakon.id }}" class="lakon-toggle">
-                            <label for="flip-{{ lakon.id }}" class="lakon-inner">
-                                <div class="lakon-front">
-                                    <span class="lakon-category">{{ lakon.get_category_display }}</span>
-                                    <h2>{{ lakon.title }}</h2>
-                                </div>
-                                <div class="lakon-back">
-                                    {% if lakon.photo %}
-                                        <img src="/static/{{ lakon.photo }}" class="lakon-photo">
-                                    {% else %}
-                                        <p class="lakon-placeholder">...</p>
-                                    {% endif %}
-                                </div>
-                        </label>
-                        </div>
-                        <div class="lakon-actions">
-                            {% include "components/lakon_star.html" with lakon=lakon %}
-                            {% if can_edit %}
-                                <a href="{% url 'main:update_lakon' lakon.id %}" class="button">Sunting</a>
-                            {% endif %}
-                            {% if user.is_superuser %}
-                                {% include "components/lakon_delete_modal.html" with lakon=lakon %}
-                            {% endif %}
-                        </div>
-                    </div>
-                {% empty %}
-                    <p class="empty-state">Belum ada hal yang dilakoni.</p>
-                {% endfor %}    
-            </div>
+        <div id="grid" class="lakoni-grid hide"></div>
         </div>
        </section>
     </main>
+    {% if user.is_superuser %}
+        {% include "components/lakon_form_modal.html" %}
+    {% endif %}
     <script>
+
     const BASE_LAKON_ENDPOINT = "{% url 'main:get_lakon_json' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
-    let projectAbortController;
+    const CAN_EDIT = "{{ can_edit|yesno:'true,false' }}" === "true";
+    let lakonAbortController;
 
     const loadingState = document.getElementById('loading');
     const errorState = document.getElementById('error');
     const emptyState = document.getElementById('empty');
     const gridContainer = document.getElementById('grid');
-    const searchForm = document.getElementById('project-search-form');
+    const searchForm = document.getElementById('lakon-search-form');
     const searchInput = document.getElementById('search-input');
     const SEARCH_DEBOUNCE_DELAY = 300;
     let searchDebounceTimer;
@@ -106,66 +77,87 @@
         gridContainer.classList.toggle('hide', !showGrid);
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function buildLakonCardElement(item) {
         const lakon = item.fields;
         const lakonId = item.pk;
+        const safeTitle = escapeHtml(lakon.title);
+        const safeCategory = escapeHtml(lakon.category_display);
+        const safePhoto = escapeHtml(lakon.photo);
+        const safeStarredBy = escapeHtml(lakon.starred_by_names);
 
-        const articleElement = document.createElement('article');
-        articleElement.className = 'experience-card';
+        const articleElement = document.createElement('div');
+        articleElement.className = 'lakon-card';
 
-        const imageHtml = lakon.lakon_image_url
-            ?`<img src="${lakon.lakon_image_url}" alt="Gambar ${lakon.title}" class="lakon-image">`
-            : '';
-        
-        const urlHtml = lakon.lakon_url 
-            ? `<a href="${lakon.lakon_url}" class="button">Tilik Lakon</a>`
-            : '';
+        const photoHtml = lakon.photo
+            ? `<img src="/static/${safePhoto}" class="lakon-photo" alt="">`
+            : `<p class="lakon-placeholder">...</p>`;
 
+        const editUrl = "{% url 'main:update_lakon' '00000000-0000-0000-0000-000000000000' %}"
+            .replace('00000000-0000-0000-0000-000000000000', lakonId);
         const deleteUrl = "{% url 'main:delete_lakon' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', lakonId);
         const starUrl = "{% url 'main:toggle_star' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', lakonId);
 
-        const deleteHtml = IS_SUPERUSER 
+        const editHtml = CAN_EDIT
+            ? `<a href="${editUrl}" class="button">Sunting</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER
             ? `<form method="post" action="${deleteUrl}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="button button-danger" onclick="return confirm('Betulan ingin hapuskan lakon ini?');">Hapus</button>
+                <button type="submit" class="button button-danger"
+                        onclick="return confirm('Betulan ingin hapuskan lakon ini?');">Hapus</button>
             </form>`
             : '';
-        
+
         const isStarredClass = lakon.is_starred ? " is-starred" : "";
         const starText = lakon.is_starred ? "Unstar" : "Star";
         const starTitle = lakon.star_count > 0
-            ? `Dibintangi oleh ${lakon.starred_by_names}` 
+            ? `Dibintangi oleh ${safeStarredBy}`
             : "Jadilah yang pertama memberi star";
-            
-         const completeCardHtml = `
-            ${imageHtml}
-            <h2>${lakon.title}</h2>
-            <span class="experience-category">${lakon.tech_stack}</span>
-            <p class="experience-description">${lakon.description}</p>
-            <div class="lakon-card-actions">
-                <div class="lakon-actions">
-                    ${urlHtml}
-                    
-                    <form method="post" action="${starUrl}" class="star-form">
-                        {% csrf_token %}
-                        <button type="submit" 
-                                class="button button-star${isStarredClass}"
-                                title="${starTitle}">
-                            <span aria-hidden="true">★</span>
-                            ${starText}
-                            <span class="star-count">${lakon.star_count}</span>
-                        </button>
-                    </form>
 
-                    ${deleteHtml}
-                </div>
+        articleElement.innerHTML = `
+            <div class="lakon-flip">
+                <div class="lakon-block"></div>
+                <input type="checkbox" id="flip-${lakonId}" class="lakon-toggle">
+                <label for="flip-${lakonId}" class="lakon-inner">
+                    <div class="lakon-front">
+                        <span class="lakon-category">${safeCategory}</span>
+                        <h2>${safeTitle}</h2>
+                    </div>
+                    <div class="lakon-back">${photoHtml}</div>
+                </label>
+            </div>
+            <div class="lakon-actions">
+                <form method="post" action="${starUrl}" class="star-form">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="button button-star${isStarredClass}"
+                            title="${starTitle}">
+                        <span aria-hidden="true">★</span>
+                        ${starText}
+                        <span class="star-count">${lakon.star_count}</span>
+                    </button>
+                </form>
+                ${editHtml}
+                ${deleteHtml}
             </div>
         `;
+        return articleElement;
+    }
 
-        articleElement.innerHTML = completeCardHtml;
-        return articleElement;       
+    function closeLakonModal() {
+        document.getElementById("add-lakon-modal").hidePopover();
     }
 
     async function fetchLakon(searchQuery = "") {
@@ -203,7 +195,7 @@
     }
 
     function searchLakon() {
-    fetchLakon(searchInput.value.trim());
+        fetchLakon(searchInput.value.trim());
     }
 
     searchInput.addEventListener("input", function() {
@@ -220,6 +212,64 @@
         searchLakon();
     });
 
-    fetchLakon(searchInput.value.trim());
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const lakonForm = document.getElementById('lakon-form');
+
+    // lakonForm hanya ada untuk superuser (modalnya tidak dirender untuk yang lain)
+    if (lakonForm) {
+        lakonForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            lakonForm.querySelectorAll('.form-error-js').forEach(el => el.remove());
+
+            try {
+                const response = await fetch("{% url 'main:create_lakon_ajax' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    body: new FormData(lakonForm),
+                });
+                const result = await response.json();
+
+                if (response.status === 201) {
+                    closeLakonModal();
+                    lakonForm.reset();
+                    showToast('Berhasil', result.message, 'success');
+                    fetchLakon(searchInput.value.trim());
+                } else if (response.status === 400) {
+                    showToast('Gagal', result.message, 'error');
+                    for (const [field, messages] of Object.entries(result.errors)) {
+                        const input = lakonForm.querySelector(`[name="${field}"]`);
+                        if (!input) continue;
+                        messages.forEach(msg => {
+                            const p = document.createElement('p');
+                            p.className = 'form-error form-error-js';
+                            p.textContent = msg;
+                            input.insertAdjacentElement('afterend', p);
+                        });
+                    }
+                } else {
+                    showToast('Ditolak', result.message, 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Error', 'Tak dapat terhubung ke server.', 'error');
+            }
+        });
+    }
+
+
     </script>
 {% endblock content %}

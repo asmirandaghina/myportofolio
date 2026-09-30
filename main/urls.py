@@ -25,4 +25,5 @@ urlpatterns = [
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
     path("lakoni/<uuid:lakon_id>/star/", toggle_star, name="toggle_star"),
+    path("lakoni/add-ajax/", create_lakon_ajax, name="create_lakon_ajax"),
 ]

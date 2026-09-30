@@ -13,6 +13,8 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
+from main.forms import LakonForm
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 def show_main(request):
@@ -40,6 +42,8 @@ def show_lakoni(request):
     context = {
         "name": "Asmiranda Ghina",
         "title_query": title_query,
+        "form": LakonForm(),
+        "can_edit": can_edit(request.user),
     }
     return render(request, "lakoni.html", context)
 
@@ -101,7 +105,7 @@ def get_lakon_json(request):
         lakon_list = lakon_list.filter(title__icontains=title_query)
 
     data = []
-    for lakon in lakons:
+    for lakon in lakon_list:
         starred_users = lakon.starred_by.all()
         is_starred = request.user in starred_users if request.user.is_authenticated else False
         starred_by_names = ",".join([u.username for u in starred_users])
@@ -111,6 +115,7 @@ def get_lakon_json(request):
             "fields": {
                 "title": lakon.title,
                 "category": lakon.category,
+                "category_display": lakon.get_category_display(),
                 "photo": lakon.photo,
                 "star_count": starred_users.count(),
                 "is_starred": is_starred,
@@ -173,3 +178,29 @@ def is_editor(user):
 
 def can_edit(user):
     return user.is_superuser or is_editor(user)
+
+@require_POST
+def create_lakon_ajax(request):
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"success": False, "message": "Silakan login dulu."}, status=401
+        )
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"success": False, "message": "Hanya pemilik yang boleh menambah lakon."},
+            status=403,
+        )
+
+    form = LakonForm(request.POST)
+    if form.is_valid():
+        lakon = form.save()
+        return JsonResponse(
+            {"success": True, "message": "Lakon berhasil ditambahkan!", "pk": str(lakon.id)},
+            status=201,
+        )
+
+    errors = {field: [str(e) for e in errs] for field, errs in form.errors.items()}
+    return JsonResponse(
+        {"success": False, "message": "Data belum valid.", "errors": errors},
+        status=400,
+    )
