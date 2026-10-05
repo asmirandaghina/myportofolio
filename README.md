@@ -31,3 +31,12 @@ Saya menggunakan Claude untuk membantu menyelesaikan masalah bagian experience.h
 
 Penggunaan AI:
 Saya menggunakan Claude umemahami konsep JSON dan proses serialize/deserialize yang belum saya ketahui sebelumnya, serta debug beberapa error saat implementasi, seperti typo pada penulisan sintaks. Juga pada pengaplikasian format JSON yang belum saya ketahui sebelumnya.
+
+### Tugas 5
+1. Debouncing adalah teknik untuk menunda eksekusi sebuah fungsi sampai ada jeda waktu tertentu tanpa ada event baru. Pebting untuk pencarian AJAX karena: (1) Dapat mengurangi jumlah request. Tanpa debouncing, event input dapat memicu satu request per karakter. Dengan debouncing, hanya 1 request setelah pengguna berhenti mengetik. (2) Menghemat beban server dan jaringan, karena server tak dibanjiri permintaan. (3) UI lebih mulus karena kartu proyek tak berkedip-kedip dan berganti terus saat mengetik.
+
+2. Fungsi penggunaan await ketika menggunakan fetch() adalah membuat eksekusi menunggu pengembalian Promise oleh fetch() selesai, lalu mengembalikan nilai hasilnya (objek Response) sebelum lanjut ke baris berikutnya. Jika tidak menggunakan await, variabel response tidak berisi hasil respons melainkan objek Promise yang masih pending. Kode di baris berikutnya langsun dieksekusi tanpa menunggu.
+
+3. Serangan XSS adalah serangan ketika penyerang menyisipkan kode JavaScript miliknya ke halaman web, yang lalu dijalankan di browser user lain. Dampaknya misal mencuri data/cookie, memberi star, atau mengahpus proyek atas nama korban. Data yang ditampilkan melalui AJAX lebih rentan terhadap serangan ini karena pada AJAX, data JSON dirakit sendiri di JavaScript ke dalam template literal lalu dipasang lewat innerHTML. Tidak ada lagi Django yang melakukan escaping, jadi browser menganggap tag HTML di dalam data sebagai kode sungguhan.
+
+Penggunaan AI: Saya menggunakan Claude untuk memahami konsep pada tutorial 5. Juga untuk membantu menemukan debug beberapa error saat implementasi.
