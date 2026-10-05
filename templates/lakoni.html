@@ -249,7 +249,8 @@
                     showToast('Berhasil', result.message, 'success');
                     fetchLakon(searchInput.value.trim());
                 } else if (response.status === 400) {
-                    showToast('Gagal', result.message, 'error');
+                    const detail = Object.values(result.errors || {}).flat().join(' ');
+                    showToast('Gagal', detail || result.message, 'error');
                     for (const [field, messages] of Object.entries(result.errors)) {
                         const input = lakonForm.querySelector(`[name="${field}"]`);
                         if (!input) continue;
@@ -270,6 +271,6 @@
         });
     }
 
-
+    fetchLakon(searchInput.value.trim());
     </script>
 {% endblock content %}

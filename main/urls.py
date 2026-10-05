@@ -9,7 +9,8 @@ from main.views import (show_main,
                         register,
                         login_user,
                         logout_user,
-                        toggle_star)
+                        toggle_star,
+                        create_lakon_ajax)
 
 app_name = "main"
 
