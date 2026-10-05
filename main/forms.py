@@ -37,3 +37,6 @@ class LakonForm(ModelForm):
         if not title:
             raise ValidationError("Nama kegiatan tidak boleh hanya berisi tag HTML.")
         return title
+
+    def clean_photo(self):
+        return strip_tags(self.cleaned_data["photo"]).strip()

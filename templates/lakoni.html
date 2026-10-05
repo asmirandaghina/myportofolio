@@ -164,6 +164,7 @@
         if (lakonAbortController) lakonAbortController.abort();
         lakonAbortController = new AbortController();
 
+
         try {
             displayPageSection({ showLoading: true });
             
@@ -235,13 +236,16 @@
             event.preventDefault();
             lakonForm.querySelectorAll('.form-error-js').forEach(el => el.remove());
 
+            const submitButton = lakonForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
             try {
                 const response = await fetch("{% url 'main:create_lakon_ajax' %}", {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCookie('csrftoken') },
                     body: new FormData(lakonForm),
                 });
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
 
                 if (response.status === 201) {
                     closeLakonModal();
@@ -251,7 +255,7 @@
                 } else if (response.status === 400) {
                     const detail = Object.values(result.errors || {}).flat().join(' ');
                     showToast('Gagal', detail || result.message, 'error');
-                    for (const [field, messages] of Object.entries(result.errors)) {
+                    for (const [field, messages] of Object.entries(result.errors || {})) {
                         const input = lakonForm.querySelector(`[name="${field}"]`);
                         if (!input) continue;
                         messages.forEach(msg => {
@@ -262,11 +266,13 @@
                         });
                     }
                 } else {
-                    showToast('Ditolak', result.message, 'error');
+                    showToast('Ditolak', result.message || `Terjadi kesalahan (status ${response.status}).`, 'error');
                 }
             } catch (error) {
                 console.error(error);
                 showToast('Error', 'Tak dapat terhubung ke server.', 'error');
+            } finally {
+                submitButton.disabled = false;
             }
         });
     }
