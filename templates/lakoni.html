@@ -54,12 +54,17 @@
     {% if user.is_superuser %}
         {% include "components/lakon_form_modal.html" %}
     {% endif %}
+    {% csrf_token %}
     <script>
-
-    const BASE_LAKON_ENDPOINT = "{% url 'main:get_lakon_json' %}";
+    const BASE_LAKON_ENDPOINT = "{% url 'api:lakon-list' %}";
+    const DETAIL_LAKON_ENDPOINT = "{% url 'api:lakon-detail' '00000000-0000-0000-0000-000000000000' %}";
+    const STAR_LAKON_ENDPOINT = "{% url 'api:lakon-star' '00000000-0000-0000-0000-000000000000' %}";
+    const EDIT_LAKON_PAGE = "{% url 'main:update_lakon' '00000000-0000-0000-0000-000000000000' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = "{{ can_edit|yesno:'true,false' }}" === "true";
-    let lakonAbortController;
+    const ZERO_UUID = '00000000-0000-0000-0000-000000000000';
+    const SEARCH_DEBOUNCE_DELAY = 300;
 
     const loadingState = document.getElementById('loading');
     const errorState = document.getElementById('error');
@@ -67,70 +72,73 @@
     const gridContainer = document.getElementById('grid');
     const searchForm = document.getElementById('lakon-search-form');
     const searchInput = document.getElementById('search-input');
-    const SEARCH_DEBOUNCE_DELAY = 300;
+    const lakonForm = document.getElementById('lakon-form');
+    let lakonAbortController;
     let searchDebounceTimer;
 
-    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false}) {
+    function getCookie(name) {
+        const prefix = `${name}=`;
+        const cookie = document.cookie.split(';').map(value => value.trim())
+            .find(value => value.startsWith(prefix));
+        return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    }
+
+    function lakonEndpoint(pattern, id) {
+        return pattern.replace(ZERO_UUID, id);
+    }
+
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
         loadingState.classList.toggle('hide', !showLoading);
         errorState.classList.toggle('hide', !showError);
         emptyState.classList.toggle('hide', !showEmpty);
         gridContainer.classList.toggle('hide', !showGrid);
     }
 
-    function escapeHtml(value) {
-        return String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-
-    function buildLakonCardElement(item) {
-        const lakon = item.fields;
-        const lakonId = item.pk;
+    function buildLakonCardElement(lakon) {
+        const id = escapeHtml(lakon.id);
         const safeTitle = escapeHtml(lakon.title);
         const safeCategory = escapeHtml(lakon.category_display);
         const safePhoto = escapeHtml(lakon.photo);
         const safeStarredBy = escapeHtml(lakon.starred_by_names);
 
-        const articleElement = document.createElement('div');
-        articleElement.className = 'lakon-card';
+        const card = document.createElement('div');
+        card.className = 'lakon-card';
 
         const photoHtml = lakon.photo
             ? `<img src="/static/${safePhoto}" class="lakon-photo" alt="">`
             : `<p class="lakon-placeholder">...</p>`;
 
-        const editUrl = "{% url 'main:update_lakon' '00000000-0000-0000-0000-000000000000' %}"
-            .replace('00000000-0000-0000-0000-000000000000', lakonId);
-        const deleteUrl = "{% url 'main:delete_lakon' '00000000-0000-0000-0000-000000000000' %}"
-            .replace('00000000-0000-0000-0000-000000000000', lakonId);
-        const starUrl = "{% url 'main:toggle_star' '00000000-0000-0000-0000-000000000000' %}"
-            .replace('00000000-0000-0000-0000-000000000000', lakonId);
-
-        const editHtml = CAN_EDIT
-            ? `<a href="${editUrl}" class="button">Sunting</a>`
-            : '';
-
-        const deleteHtml = IS_SUPERUSER
-            ? `<form method="post" action="${deleteUrl}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="button button-danger"
-                        onclick="return confirm('Betulan ingin hapuskan lakon ini?');">Hapus</button>
-            </form>`
-            : '';
-
-        const isStarredClass = lakon.is_starred ? " is-starred" : "";
-        const starText = lakon.is_starred ? "Unstar" : "Star";
         const starTitle = lakon.star_count > 0
             ? `Dibintangi oleh ${safeStarredBy}`
-            : "Jadilah yang pertama memberi star";
+            : 'Jadilah yang pertama memberi star';
+        const starInner = `<span aria-hidden="true">★</span>
+            ${lakon.is_starred ? 'Unstar' : 'Star'}
+            <span class="star-count">${lakon.star_count}</span>`;
 
-        articleElement.innerHTML = `
+        const starHtml = IS_AUTHENTICATED
+            ? `<button type="button" data-action="star" data-id="${id}"
+                       class="button button-star${lakon.is_starred ? ' is-starred' : ''}"
+                       title="${starTitle}">${starInner}</button>`
+            : `<a href="{% url 'main:login' %}" class="button button-star"
+                  title="Login dulu untuk memberi star">${starInner}</a>`;
+
+        const editHtml = CAN_EDIT
+            ? `<a href="${lakonEndpoint(EDIT_LAKON_PAGE, id)}" class="button">Sunting</a>` : '';
+        const deleteHtml = IS_SUPERUSER
+            ? `<button type="button" data-action="delete" data-id="${id}"
+                       class="button button-danger">Hapus</button>` : '';
+
+        card.innerHTML = `
             <div class="lakon-flip">
                 <div class="lakon-block"></div>
-                <input type="checkbox" id="flip-${lakonId}" class="lakon-toggle">
-                <label for="flip-${lakonId}" class="lakon-inner">
+                <input type="checkbox" id="flip-${id}" class="lakon-toggle">
+                <label for="flip-${id}" class="lakon-inner">
                     <div class="lakon-front">
                         <span class="lakon-category">${safeCategory}</span>
                         <h2>${safeTitle}</h2>
@@ -138,56 +146,33 @@
                     <div class="lakon-back">${photoHtml}</div>
                 </label>
             </div>
-            <div class="lakon-actions">
-                <form method="post" action="${starUrl}" class="star-form">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="button button-star${isStarredClass}"
-                            title="${starTitle}">
-                        <span aria-hidden="true">★</span>
-                        ${starText}
-                        <span class="star-count">${lakon.star_count}</span>
-                    </button>
-                </form>
-                ${editHtml}
-                ${deleteHtml}
-            </div>
-        `;
-        return articleElement;
+            <div class="lakon-actions">${starHtml}${editHtml}${deleteHtml}</div>`;
+        return card;
     }
 
     function closeLakonModal() {
-        document.getElementById("add-lakon-modal").hidePopover();
+        document.getElementById('add-lakon-modal').hidePopover();
     }
 
-    async function fetchLakon(searchQuery = "") {
+    async function fetchLakon(searchQuery = '') {
         if (lakonAbortController) lakonAbortController.abort();
         lakonAbortController = new AbortController();
 
-
         try {
             displayPageSection({ showLoading: true });
-            
-            const url = searchQuery ? `${BASE_LAKON_ENDPOINT}?title=${encodeURIComponent(searchQuery)}` : BASE_LAKON_ENDPOINT;
-            
+
+            const url = new URL(BASE_LAKON_ENDPOINT, window.location.origin);
+            if (searchQuery) url.searchParams.set('title', searchQuery);
+
             const response = await fetch(url, {
-                headers: { 'Accept': 'application/json' },
+                headers: { Accept: 'application/json' },
                 signal: lakonAbortController.signal,
             });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-            if (!response.ok) throw new Error('Failed to fetch data');
-
-            const lakonData = await response.json();
-
-            if (lakonData.length === 0) {
-                displayPageSection({ showEmpty: true });
-            } else {
-                gridContainer.innerHTML = '';
-                lakonData.forEach(item => {
-                    gridContainer.appendChild(buildLakonCardElement(item));
-                });
-                displayPageSection({ showGrid: true });
-            }
+            const lakons = await response.json();
+            gridContainer.replaceChildren(...lakons.map(buildLakonCardElement));
+            displayPageSection({ showGrid: lakons.length > 0, showEmpty: lakons.length === 0 });
         } catch (error) {
             if (error.name === 'AbortError') return;
             console.error('Error loading lakon:', error);
@@ -195,87 +180,103 @@
         }
     }
 
-    function searchLakon() {
-        fetchLakon(searchInput.value.trim());
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data).flat().filter(value => typeof value === 'string');
+        return messages.join(' ') || `Permintaan gagal (HTTP ${status}).`;
     }
 
-    searchInput.addEventListener("input", function() {
-        clearTimeout(searchDebounceTimer);
+    // Satu pintu untuk POST/PATCH/DELETE: JSON, token CSRF, dan penanganan error.
+    async function writeLakon(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (response.status === 204) return null;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            const error = new Error(apiErrorMessage(data, response.status));
+            error.status = response.status;
+            error.data = data;
+            throw error;
+        }
+        return data;
+    }
 
-        searchDebounceTimer = setTimeout(function() {
-            searchLakon();
-        }, SEARCH_DEBOUNCE_DELAY);
-    });
-
-    searchForm.addEventListener("submit", function(event) {
+    async function addLakon(event) {
         event.preventDefault();
-        clearTimeout(searchDebounceTimer);
-        searchLakon();
-    });
+        lakonForm.querySelectorAll('.form-error-js').forEach(el => el.remove());
+        const button = lakonForm.querySelector('button[type="submit"]');
+        button.disabled = true;
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+        try {
+            const fields = new FormData(lakonForm);
+            const payload = Object.fromEntries(
+                ['title', 'category', 'photo'].map(name => [name, fields.get(name)])
+            );
+            await writeLakon(BASE_LAKON_ENDPOINT, 'POST', payload);
+            lakonForm.reset();
+            closeLakonModal();
+            showToast('Berhasil', 'Lakon berhasil ditambahkan!', 'success');
+            await fetchLakon(searchInput.value.trim());
+        } catch (error) {
+            showToast('Gagal menambah lakon', error.message, 'error');
+            if (error.status === 400) {
+                for (const [field, messages] of Object.entries(error.data || {})) {
+                    const input = lakonForm.querySelector(`[name="${field}"]`);
+                    if (!input) continue;
+                    [].concat(messages).forEach(msg => {
+                        const p = document.createElement('p');
+                        p.className = 'form-error form-error-js';
+                        p.textContent = msg;
+                        input.insertAdjacentElement('afterend', p);
+                    });
                 }
             }
+        } finally {
+            button.disabled = false;
         }
-        return cookieValue;
     }
-
-    const lakonForm = document.getElementById('lakon-form');
 
     // lakonForm hanya ada untuk superuser (modalnya tidak dirender untuk yang lain)
-    if (lakonForm) {
-        lakonForm.addEventListener('submit', async function (event) {
-            event.preventDefault();
-            lakonForm.querySelectorAll('.form-error-js').forEach(el => el.remove());
+    if (lakonForm) lakonForm.addEventListener('submit', addLakon);
 
-            const submitButton = lakonForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
+    gridContainer.addEventListener('click', async function (event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button || button.disabled) return;
 
-            try {
-                const response = await fetch("{% url 'main:create_lakon_ajax' %}", {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                    body: new FormData(lakonForm),
-                });
-                const result = await response.json().catch(() => ({}));
+        const action = button.dataset.action;
+        if (action === 'delete' && !window.confirm('Betulan ingin hapuskan lakon ini?')) return;
 
-                if (response.status === 201) {
-                    closeLakonModal();
-                    lakonForm.reset();
-                    showToast('Berhasil', result.message, 'success');
-                    fetchLakon(searchInput.value.trim());
-                } else if (response.status === 400) {
-                    const detail = Object.values(result.errors || {}).flat().join(' ');
-                    showToast('Gagal', detail || result.message, 'error');
-                    for (const [field, messages] of Object.entries(result.errors || {})) {
-                        const input = lakonForm.querySelector(`[name="${field}"]`);
-                        if (!input) continue;
-                        messages.forEach(msg => {
-                            const p = document.createElement('p');
-                            p.className = 'form-error form-error-js';
-                            p.textContent = msg;
-                            input.insertAdjacentElement('afterend', p);
-                        });
-                    }
-                } else {
-                    showToast('Ditolak', result.message || `Terjadi kesalahan (status ${response.status}).`, 'error');
-                }
-            } catch (error) {
-                console.error(error);
-                showToast('Error', 'Tak dapat terhubung ke server.', 'error');
-            } finally {
-                submitButton.disabled = false;
-            }
-        });
-    }
+        button.disabled = true;
+        try {
+            const pattern = action === 'star' ? STAR_LAKON_ENDPOINT : DETAIL_LAKON_ENDPOINT;
+            await writeLakon(lakonEndpoint(pattern, button.dataset.id),
+                             action === 'star' ? 'POST' : 'DELETE');
+            showToast('Berhasil', action === 'star' ? 'Star diperbarui.' : 'Lakon dihapus.', 'success');
+            await fetchLakon(searchInput.value.trim());
+        } catch (error) {
+            showToast('Permintaan gagal', error.message, 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(
+            () => fetchLakon(searchInput.value.trim()), SEARCH_DEBOUNCE_DELAY);
+    });
+
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        fetchLakon(searchInput.value.trim());
+    });
 
     fetchLakon(searchInput.value.trim());
     </script>
