@@ -31,8 +31,8 @@ def show_main(request):
 def show_experience(request):
     context = {
         "name": "Asmiranda Ghina",
-        "education_list": Experience.objects.filter(category="education"),
-        "organization_list": Experience.objects.filter(category='organization'),
+        "can_edit": can_edit(request.user),
+        "category_choices": Experience.EXPERIENCE_CHOICES,
     }
     return render(request, "experience.html", context)
 
