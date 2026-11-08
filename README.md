@@ -40,3 +40,16 @@ Saya menggunakan Claude umemahami konsep JSON dan proses serialize/deserialize y
 3. Serangan XSS adalah serangan ketika penyerang menyisipkan kode JavaScript miliknya ke halaman web, yang lalu dijalankan di browser user lain. Dampaknya misal mencuri data/cookie, memberi star, atau mengahpus proyek atas nama korban. Data yang ditampilkan melalui AJAX lebih rentan terhadap serangan ini karena pada AJAX, data JSON dirakit sendiri di JavaScript ke dalam template literal lalu dipasang lewat innerHTML. Tidak ada lagi Django yang melakukan escaping, jadi browser menganggap tag HTML di dalam data sebagai kode sungguhan.
 
 Penggunaan AI: Saya menggunakan Claude untuk memahami konsep pada tutorial 5. Juga untuk membantu menemukan debug beberapa error saat implementasi.
+
+### Tugas 6
+1. REST (Representational State Transfer) adalah gaya arsitektur untuk merancang web API, bukan library atau format data. Mengembalikan JSON saja belum cukup karena yang menentukan RESTful adalah cara API diatur: data diperlakukan sebagai resource yang ditunjuk URL, HTTP method menyatakan tindakan (GET membaca, POST membuat, PUT/PATCH mengubah, DELETE menghapus), dan klien serta server bertukar representasi data. PUT mengirim representasi pengganti dengan seluruh field wajib, jadi cocok kalau seluruh data memang ingin diganti. PATCH hanya mengirim field yang ingin diubah, jadi cocok untuk perubahan kecil, misalnya Editor yang hanya mengganti period_label sebuah pengalaman.
+
+2. Serializer bekerja pada GET, yaitu mengubah objek model menjadi data yang dapat dirender ke JSON (serialization), dan pada POST/PUT/PATCH, yaitu memeriksa input lewat is_valid() lalu menyimpannya lewat save() (deserialization). Dibanding merakit dictionary manual dengan JsonResponse, satu ExperienceSerializer bisa dipakai ulang untuk daftar, detail, tambah, ubah, dan star. Validasinya juga otomatis dengan error per field (response 400), dan field hasil perhitungan seperti star_count bersifat read-only sehingga tidak bisa dipalsukan oleh user.
+
+3. Autentikasi menjawab siapa pengirim request, sedangkan otorisasi menjawab apa yang boleh dilakukan. Di DRF, authentication class (SessionAuthentication) mengisi request.user, lalu permission class memutuskan apakah request boleh diteruskan. Hak akses harus diperiksa di server karena menyembunyikan tombol di template hanya membantu pengalaman pengguna. Request tetap bisa dikirim langsung ke API tanpa melewati template, misalnya lewat Console DevTools, jadi permission di server yang menentukan izin sesungguhnya (403 jika tidak diizinkan).
+
+4. SessionAuthentication mengenali session Django dari login yang sudah dibuat, dan browser pada origin yang sama mengirim cookie session pada request Fetch. Karena itu, untuk POST, PUT, PATCH, dan DELETE dari pengguna yang terautentikasi lewat session, request harus menyertakan token CSRF di header X-CSRFToken. Test yang memakai force_authenticate tidak cukup karena ia memilih pengguna secara langsung sehingga tidak menguji proses login maupun CSRF, jadi hanya cocok untuk menguji permission.
+
+Penggunaan AI:
+Saya menggunakan Claude untuk memahami konsep DRF, REST, permission, dan CSRF pada Tutorial 07 dan Tugas 6. Claude juga membantu menemukan masalah di proyek saya, yaitu field starred_by pada model Experience yang tidak punya migrasi dan test yang gagal.
+
